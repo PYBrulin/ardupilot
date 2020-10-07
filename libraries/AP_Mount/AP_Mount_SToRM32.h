@@ -45,11 +45,16 @@ private:
     // send_do_mount_control - send a COMMAND_LONG containing a do_mount_control message
     void send_do_mount_control(float pitch_deg, float roll_deg, float yaw_deg, enum MAV_MOUNT_MODE mount_mode);
 
+    // stabilize - stabilizes the mount relative to the Earth's frame
+    void stabilize();
+
     // internal variables
     bool _initialised;              // true once the driver has been initialised
     uint8_t _sysid;                 // sysid of gimbal
     uint8_t _compid;                // component id of gimbal
     mavlink_channel_t _chan;        // mavlink channel used to communicate with gimbal.  Currently hard-coded to Telem2
     uint32_t _last_send;            // system time of last do_mount_control sent to gimbal
+
+    Vector3f _angle_bf_output_deg;  // final body frame output angle in degrees
 };
 #endif // HAL_MOUNT_ENABLED
