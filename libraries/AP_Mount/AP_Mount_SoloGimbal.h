@@ -55,6 +55,9 @@ private:
     // Write a gimbal measurament and estimation data packet
     void Log_Write_Gimbal(SoloGimbal &gimbal);
 
+    // stabilize - stabilizes the mount relative to the Earth's frame
+    void stabilize() override;
+
     bool _params_saved;
 
     SoloGimbal _gimbal;
