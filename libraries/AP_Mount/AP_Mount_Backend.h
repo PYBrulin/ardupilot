@@ -82,6 +82,9 @@ public:
     // send a GIMBAL_REPORT message to the GCS
     virtual void send_gimbal_report(const mavlink_channel_t chan) {}
 
+    // stabilize the gimbal given that the relevant stab parameters are enabled
+    virtual void stabilize() = 0;
+
 protected:
 
     // update_targets_from_rc - updates angle targets (i.e. _angle_ef_target_rad) using input from receiver
@@ -121,6 +124,7 @@ protected:
     AP_Mount::mount_state &_state;    // references to the parameters and state for this backend
     uint8_t     _instance;  // this instance's number
     Vector3f    _angle_ef_target_rad;   // desired earth-frame roll, tilt and vehicle-relative pan angles in radians
+    Vector3f    _angle_bf_output_deg;   // final body frame output angle in degrees
 
 private:
 

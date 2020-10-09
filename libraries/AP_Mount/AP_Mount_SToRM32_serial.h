@@ -48,6 +48,9 @@ private:
     void read_incoming();
     void parse_reply();
 
+    // stabilize - stabilizes the mount relative to the Earth's frame
+    void stabilize() override;
+
     enum ReplyType {
         ReplyType_UNKNOWN = 0,
         ReplyType_DATA,

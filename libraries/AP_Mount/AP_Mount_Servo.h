@@ -53,7 +53,7 @@ private:
     void    check_servo_map();
 
     // stabilize - stabilizes the mount relative to the Earth's frame
-    void stabilize();
+    void stabilize() override;
 
     // closest_limit - returns closest angle to 'angle' taking into account limits.  all angles are in degrees * 10
     int16_t closest_limit(int16_t angle, int16_t angle_min, int16_t angle_max);
@@ -66,8 +66,6 @@ private:
     SRV_Channel::Aux_servo_function_t    _tilt_idx;  // SRV_Channel mount tilt function index
     SRV_Channel::Aux_servo_function_t    _pan_idx;   // SRV_Channel mount pan  function index
     SRV_Channel::Aux_servo_function_t    _open_idx;  // SRV_Channel mount open function index
-
-    Vector3f _angle_bf_output_deg;  // final body frame output angle in degrees
 
     uint32_t _last_check_servo_map_ms;  // system time of latest call to check_servo_map function
 };

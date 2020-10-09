@@ -117,6 +117,9 @@ private:
     // read_incoming - detect and read the header of the incoming message from the gimbal
     void read_incoming();
 
+    // stabilize - stabilizes the mount relative to the Earth's frame
+    void stabilize() override;
+
     // structure for the Serial Protocol
 
     // CMD_BOARD_INFO

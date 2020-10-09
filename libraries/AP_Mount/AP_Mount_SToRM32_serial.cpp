@@ -63,6 +63,7 @@ void AP_Mount_SToRM32_serial::update()
         // point to the angles given by a mavlink message
         case MAV_MOUNT_MODE_MAVLINK_TARGETING:
             // do nothing because earth-frame angle targets (i.e. _angle_ef_target_rad) should have already been set by a MOUNT_CONTROL message from GCS
+            stabilize();
             resend_now = true;
             break;
 
@@ -70,12 +71,14 @@ void AP_Mount_SToRM32_serial::update()
         case MAV_MOUNT_MODE_RC_TARGETING:
             // update targets using pilot's rc inputs
             update_targets_from_rc();
+            stabilize();
             resend_now = true;
             break;
 
         // point mount to a GPS point given by the mission planner
         case MAV_MOUNT_MODE_GPS_POINT:
             if (calc_angle_to_roi_target(_angle_ef_target_rad, true, true)) {
+                stabilize();
                 resend_now = true;
             }
             break;
@@ -84,6 +87,7 @@ void AP_Mount_SToRM32_serial::update()
             if (calc_angle_to_sysid_target(_angle_ef_target_rad,
                                            true,
                                            true)) {
+                stabilize();
                 resend_now = true;
             }
             break;
@@ -101,7 +105,9 @@ void AP_Mount_SToRM32_serial::update()
     }
     if (can_send(resend_now)) {
         if (resend_now) {
-            send_target_angles(ToDeg(_angle_ef_target_rad.y), ToDeg(_angle_ef_target_rad.x), ToDeg(_angle_ef_target_rad.z));
+            send_target_angles(ToDeg(_angle_ef_target_rad.y) + _angle_bf_output_deg.x,
+                               ToDeg(_angle_ef_target_rad.x) + _angle_bf_output_deg.y,
+                               ToDeg(_angle_ef_target_rad.z) + _angle_bf_output_deg.z);
             get_angles();
             _reply_type = ReplyType_ACK;
             _reply_counter = 0;
@@ -111,6 +117,49 @@ void AP_Mount_SToRM32_serial::update()
             _reply_type = ReplyType_DATA;
             _reply_counter = 0;
             _reply_length = get_reply_size(_reply_type);
+        }
+    }
+}
+
+// stabilize - stabilizes the mount relative to the Earth's frame
+//  input: _angle_ef_target_rad (earth frame targets in radians)
+//  output: _angle_bf_output_deg (body frame angles in degrees)
+void AP_Mount_SToRM32_serial::stabilize()
+{
+    AP_AHRS &ahrs = AP::ahrs();
+    // only do the full 3D frame transform if we are doing pan control
+    if (_state._stab_pan) {
+        Matrix3f m;                         ///< holds 3 x 3 matrix, var is used as temp in calcs
+        Matrix3f cam;                       ///< Rotation matrix earth to camera. Desired camera from input.
+        Matrix3f gimbal_target;             ///< Rotation matrix from plane to camera. Then Euler angles to the servos.
+        m = ahrs.get_rotation_body_to_ned();
+        m.transpose();
+        cam.from_euler(_angle_ef_target_rad.x, _angle_ef_target_rad.y, _angle_ef_target_rad.z);
+        gimbal_target = m * cam;
+        gimbal_target.to_euler(&_angle_bf_output_deg.x, &_angle_bf_output_deg.y, &_angle_bf_output_deg.z);
+        _angle_bf_output_deg.x  = _state._stab_roll ? degrees(_angle_bf_output_deg.x) : 0;
+        _angle_bf_output_deg.y  = _state._stab_tilt ? degrees(_angle_bf_output_deg.y) : 0;
+        _angle_bf_output_deg.z = degrees(_angle_bf_output_deg.z);
+    } else {
+        // otherwise base mount roll and tilt on the ahrs
+        // roll/tilt attitude, plus any requested angle
+        _angle_bf_output_deg.z = 0.0f;
+        _angle_bf_output_deg.x  = _state._stab_roll ? -degrees(ahrs.roll)  : 0;
+        _angle_bf_output_deg.y  = _state._stab_tilt ? -degrees(ahrs.pitch) : 0;
+
+        // lead filter
+        const Vector3f &gyro = ahrs.get_gyro();
+
+        if (_state._stab_roll && !is_zero(_state._roll_stb_lead) && fabsf(ahrs.pitch) < M_PI/3.0f) {
+            // Compute rate of change of euler roll angle
+            float roll_rate = gyro.x + (ahrs.sin_pitch() / ahrs.cos_pitch()) * (gyro.y * ahrs.sin_roll() + gyro.z * ahrs.cos_roll());
+            _angle_bf_output_deg.x -= degrees(roll_rate) * _state._roll_stb_lead;
+        }
+
+        if (_state._stab_tilt && !is_zero(_state._pitch_stb_lead)) {
+            // Compute rate of change of euler pitch angle
+            float pitch_rate = ahrs.cos_pitch() * gyro.y - ahrs.sin_roll() * gyro.z;
+            _angle_bf_output_deg.y -= degrees(pitch_rate) * _state._pitch_stb_lead;
         }
     }
 }

@@ -84,6 +84,14 @@ void AP_Mount_SoloGimbal::update()
     }
 }
 
+// stabilize - stabilizes the mount relative to the Earth's frame
+//  input: _angle_ef_target_rad (earth frame targets in radians)
+//  output: _angle_bf_output_deg (body frame angles in degrees)
+void AP_Mount_SoloGimbal::stabilize()
+{
+    return;
+}
+
 // has_pan_control - returns true if this mount can control it's pan (required for multicopters)
 bool AP_Mount_SoloGimbal::has_pan_control() const
 {
