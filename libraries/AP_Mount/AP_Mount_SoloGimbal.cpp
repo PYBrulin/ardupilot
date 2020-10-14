@@ -91,6 +91,14 @@ bool AP_Mount_SoloGimbal::has_pan_control() const
     return false;
 }
 
+// get_pan_frame - returns true if the mount should follow earth frame
+
+bool AP_Mount_SoloGimbal::get_pan_frame() const
+{
+    // we do not have yaw control
+    return false;
+}
+
 // set_mode - sets mount's mode
 void AP_Mount_SoloGimbal::set_mode(enum MAV_MOUNT_MODE mode)
 {

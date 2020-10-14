@@ -210,7 +210,12 @@ const AP_Param::GroupInfo AP_Mount::var_info[] = {
 
     // 23 formerly _K_RATE
 
-    // 24 is AVAILABLE
+    // @Param: _IS_RATE_PAN
+    // @DisplayName: Mount pan/yaw frame
+    // @Description: Enable changing pan/yaw stabilisation relative to Body or Earth
+    // @Values: 0:Follow body frame, 1:Follow earth_frame
+    // @User: Standard
+    AP_GROUPINFO("_FRAME_PAN",   24, AP_Mount, state[0]._pan_frame,  0),
 
 #if AP_MOUNT_MAX_INSTANCES > 1
     // @Param: 2_DEFLT_MODE
@@ -392,6 +397,22 @@ const AP_Param::GroupInfo AP_Mount::var_info[] = {
     // @Values: 0:None, 1:Servo, 2:3DR Solo, 3:Alexmos Serial, 4:SToRM32 MAVLink, 5:SToRM32 Serial
     // @User: Standard
     AP_GROUPINFO("2_TYPE",           42, AP_Mount, state[1]._type, 0),
+
+    // 43 formerly _OFF_JNT
+
+    // 44 formerly _OFF_ACC
+
+    // 45 formerly _OFF_GYRO
+
+    // 46 formerly _K_RATE
+
+    // @Param: _IS_RATE_PAN
+    // @DisplayName: Mount pan/yaw frame
+    // @Description: Enable changing pan/yaw stabilisation relative to Body or Earth
+    // @Values: 0:Force body frame, 1:Keep earth_frame
+    // @User: Standard
+    AP_GROUPINFO("2_FRAME_PAN",   47, AP_Mount, state[1]._pan_frame,  0),
+
 #endif // AP_MOUNT_MAX_INSTANCES > 1
 
     AP_GROUPEND
@@ -517,6 +538,21 @@ bool AP_Mount::has_pan_control(uint8_t instance) const
 
     // ask backend if it support pan
     return _backends[instance]->has_pan_control();
+}
+
+// get_pan_frame - returns true if the mount should follow earth frame
+bool AP_Mount::get_pan_frame(uint8_t instance) const
+{
+    if (instance >= AP_MOUNT_MAX_INSTANCES || _backends[instance] == nullptr) {
+        return false;
+    }
+
+    // ask backend if it support pan, if not return false
+    if (!_backends[instance]->has_pan_control()) {
+        return false;
+    }
+
+    return _backends[instance]->get_pan_frame();
 }
 
 // get_mode - returns current mode of mount (i.e. Retracted, Neutral, RC_Targeting, GPS Point)

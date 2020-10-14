@@ -49,6 +49,9 @@ public:
     // has_pan_control - returns true if this mount can control it's pan (required for multicopters)
     virtual bool has_pan_control() const = 0;
 
+    // has_pan_control - returns true if this pan should follow body frame, else should follow earth frame
+    virtual bool get_pan_frame() const = 0;
+
     // set_mode - sets mount's mode
     virtual void set_mode(enum MAV_MOUNT_MODE mode) = 0;
 

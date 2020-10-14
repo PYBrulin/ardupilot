@@ -145,7 +145,7 @@ void AP_Mount_Servo::stabilize()
         gimbal_target.to_euler(&_angle_bf_output_deg.x, &_angle_bf_output_deg.y, &_angle_bf_output_deg.z);
         _angle_bf_output_deg.x  = _state._stab_roll ? degrees(_angle_bf_output_deg.x) : degrees(_angle_ef_target_rad.x);
         _angle_bf_output_deg.y  = _state._stab_tilt ? degrees(_angle_bf_output_deg.y) : degrees(_angle_ef_target_rad.y);
-        _angle_bf_output_deg.z = degrees(_angle_bf_output_deg.z);
+        _angle_bf_output_deg.z  = get_mode() == MAV_MOUNT_MODE_RC_TARGETING ? (_state._pan_frame ? degrees(_angle_ef_target_rad.z) : degrees(_angle_bf_output_deg.z)) : degrees(_angle_bf_output_deg.z);
     } else {
         // otherwise base mount roll and tilt on the ahrs
         // roll/tilt attitude, plus any requested angle

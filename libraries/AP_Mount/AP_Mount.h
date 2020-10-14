@@ -101,6 +101,7 @@ public:
     // has_pan_control - returns true if the mount has yaw control (required for copters)
     bool has_pan_control() const { return has_pan_control(_primary); }
     bool has_pan_control(uint8_t instance) const;
+    bool get_pan_frame(uint8_t instance) const;
 
     // get_mode - returns current mode of mount (i.e. Retracted, Neutral, RC_Targeting, GPS Point)
     enum MAV_MOUNT_MODE get_mode() const { return get_mode(_primary); }
@@ -162,6 +163,7 @@ protected:
         AP_Int8         _stab_roll;         // 1 = mount should stabilize earth-frame roll axis, 0 = no stabilization
         AP_Int8         _stab_tilt;         // 1 = mount should stabilize earth-frame pitch axis
         AP_Int8         _stab_pan;          // 1 = mount should stabilize earth-frame yaw axis
+        AP_Int8         _pan_frame;         // 0 = pan axis follows body frame, 1 = pan axis follows earth frame
 
         // RC input channels from receiver used for direct angular input from pilot
         AP_Int8         _roll_rc_in;        // pilot provides roll input on this channel

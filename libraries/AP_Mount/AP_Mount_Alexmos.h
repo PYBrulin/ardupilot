@@ -79,6 +79,9 @@ public:
     // has_pan_control - returns true if this mount can control it's pan (required for multicopters)
     bool has_pan_control() const override;
 
+    // get_pan_frame - returns true if the mount should follow earth frame
+    bool get_pan_frame() const override { return _state._pan_frame; }
+
     // set_mode - sets mount's mode
     void set_mode(enum MAV_MOUNT_MODE mode) override;
 
