@@ -1,7 +1,6 @@
 #include "AP_Mount_SToRM32.h"
 #if HAL_MOUNT_ENABLED
 #include <AP_HAL/AP_HAL.h>
-#include <GCS_MAVLink/GCS.h>
 
 extern const AP_HAL::HAL& hal;
 
@@ -136,12 +135,6 @@ void AP_Mount_SToRM32::stabilize()
             float pitch_rate = ahrs.cos_pitch() * gyro.y - ahrs.sin_roll() * gyro.z;
             _angle_bf_output_deg.y -= degrees(pitch_rate) * _state._pitch_stb_lead;
         }
-    }
-    static uint8_t counter = 0;
-    counter++;
-    if (counter > 50) {
-        counter = 0;
-        gcs().send_text(MAV_SEVERITY_CRITICAL, "hello world! %5.3f", _angle_bf_output_deg.y);
     }
 }
 
